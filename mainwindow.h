@@ -18,6 +18,7 @@ public:
     ~MainWindow();
 
 private slots:
+
     void digitNumbers();
 
     void on_dot_btn_clicked();
