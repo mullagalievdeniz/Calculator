@@ -2,6 +2,8 @@
 #include "./ui_mainwindow.h"
 #include <QStack>
 #include <cmath>
+#include <QMessageBox>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -55,20 +57,49 @@ void MainWindow::digitOperations()
     QPushButton *button = (QPushButton *)sender();
     double numbers;
     QString labelForScreen;
+    QStringList btnOperators = {"+", "-", "*", "/", "%"};
+    QStringList allowedOperations = {"+", "-"};
+
+    QString currentScreenText = (ui -> screen -> text()).remove(' ');
+    if (currentScreenText.size() > 0){
+        QChar lastSymbol = (currentScreenText).at(currentScreenText.length() - 1);
+        if (btnOperators.contains(lastSymbol) && !(allowedOperations.contains(button -> text()))){
+            QMessageBox::information(this, "Калькулятор", "Не вводите две операции подряд!");
+            return;
+        }
+    }
 
     if (button -> text() == "%"){
-        labelForScreen = ui -> screen -> text() + "%";
+        if ((ui -> screen -> text()).size() == 0){
+            QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+        } else {
+            labelForScreen = ui -> screen -> text() + "%";
+        }
 
 
     } else if (button -> text() == "+"){
-        labelForScreen = ui -> screen -> text() + " + ";
+        if ((ui -> screen -> text()).size() == 0){
+            QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+        } else {
+            labelForScreen = ui -> screen -> text() + " + ";
+        }
 
     } else if (button -> text() == "-"){
         labelForScreen = ui -> screen -> text() + " - ";
     } else if (button -> text() == "*"){
-        labelForScreen = ui -> screen -> text() + " * ";
+        if ((ui -> screen -> text()).size() == 0){
+            QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+        } else {
+            labelForScreen = ui -> screen -> text() + " * ";
+        }
+
     } else if (button -> text() == "/"){
-        labelForScreen = ui -> screen -> text() + " / ";
+        if ((ui -> screen -> text()).size() == 0){
+            QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+        } else {
+            labelForScreen = ui -> screen -> text() + " / ";
+        }
+
     }
 
     ui -> screen -> setText(labelForScreen);
@@ -78,13 +109,15 @@ void MainWindow::digitOperations()
 
 void MainWindow::on_dot_btn_clicked()
 {
-    QString currentScreenText;
-    currentScreenText = ui -> screen -> text();
-    QChar lastSymbol = currentScreenText.at(currentScreenText.length() - 1);
-    if (!(lastSymbol == '.')){
-        ui -> screen -> setText(currentScreenText + '.');
+    QString currentScreenText = ui -> screen -> text();
+    if (currentScreenText.size() == 0){
+        QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+    } else {
+        QChar lastSymbol = currentScreenText.at(currentScreenText.length() - 1);
+        if (!(lastSymbol == '.')){
+            ui -> screen -> setText(currentScreenText + '.');
+        }
     }
-
 
 }
 
@@ -95,16 +128,20 @@ void MainWindow::on_pushButton_6_clicked()
     QString labelForScreen;
     double res;
     operations = ui -> screen -> text();
-    ui -> screen -> setText(operations + " =");
-    operations = operations.remove(' ');
+    if (operations.size() == 0){
+        QMessageBox::information(this, "Калькулятор", "Первым должно быть число!");
+    } else {
+        ui -> screen -> setText(operations + " =");
+        operations = operations.remove(' ');
 
-    if (operations.contains("%")){
-        operations.replace("%", "*0.01");
+        if (operations.contains("%")){
+            operations.replace("%", "*0.01");
+        }
+
+        res = evaluateExpression(operations);
+        labelForScreen = QString::number(res, 'g', 10);
+        ui -> result -> setText(labelForScreen);
     }
-
-    res = evaluateExpression(operations);
-    labelForScreen = QString::number(res, 'g', 10);
-    ui -> result -> setText(labelForScreen);
 
 }
 
@@ -253,13 +290,16 @@ void MainWindow::on_enter_btn_clicked()
 void MainWindow::on_sqrt_btn_clicked()
 {
     QString currentScreenText = ui -> screen -> text();
-    double number;
-    ui -> screen -> setText("√" + currentScreenText + " =");
-    number = currentScreenText.toDouble();
-    double result = std::sqrt(number);
-    QString labelForScreen = QString::number(result, 'g', 10);
-    ui -> result -> setText(labelForScreen);
-
+    if (currentScreenText.size() == 0){
+        QMessageBox::information(this, "Калькулятор", "Сначала введите число, из которого хотите извлечь корень");
+    } else {
+        double number;
+        ui -> screen -> setText("√" + currentScreenText + " =");
+        number = currentScreenText.toDouble();
+        double result = std::sqrt(number);
+        QString labelForScreen = QString::number(result, 'g', 10);
+        ui -> result -> setText(labelForScreen);
+    }
 
 }
 
